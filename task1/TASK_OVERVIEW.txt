@@ -1,0 +1,203 @@
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                                                                              ║
+║                     TASK 1: CUSTOM WORLD + TURTLEBOT3                        ║
+║                          Teleoperation Challenge                             ║
+║                                                                              ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+📋 TASK REQUIREMENTS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  1. ✅ Design custom Gazebo world with obstacles
+  2. ✅ Import/spawn TurtleBot3 robot
+  3. ✅ Use teleop_twist_keyboard for control
+  4. ✅ Demonstrate robot navigation
+
+═══════════════════════════════════════════════════════════════════════════════
+
+🗺️  CUSTOM WORLD FEATURES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  Arena Size:        12 × 12 meters
+  Floor Color:       Green (navigation area)
+  Boundary Walls:    Red (1m height)
+
+  Obstacles (7 total):
+    🔵 Central Box     - Blue 1.5×1.5m (center)
+    🟡 Cylinders (2)   - Yellow r=0.5m (top corners)
+    🟣 Boxes (2)       - Purple 1×1m (bottom corners)
+    🟩 Walls (2)       - Green diagonal obstacles
+
+  Layout:
+       N (Red Boundary)
+       ↑
+    🟡 🔵 🟡
+      \ | /
+  W ← 🟩 + 🟩 → E
+      / | \
+    🟣   🟣
+       ↓
+       S
+
+  Starting Position:  (4.5, 4.5) - Top-right corner
+  Robot Orientation:  -135° (facing center)
+
+═══════════════════════════════════════════════════════════════════════════════
+
+🤖 TURTLEBOT3 CONFIGURATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  Model:             waffle_pi
+  Sensors:
+    - LiDAR          360° laser scanner
+    - Camera         RGB camera (640×480)
+    - IMU            Inertial measurement unit
+    - Odometry       Position/velocity tracking
+
+  Bridged Topics:
+    /cmd_vel         Velocity commands (keyboard → robot)
+    /odom            Position and velocity data
+    /scan            LiDAR distance measurements
+    /camera/image_raw Camera feed
+    /imu             Accelerometer & gyroscope data
+    /tf              Transform frames
+
+═══════════════════════════════════════════════════════════════════════════════
+
+🚀 QUICK START (2 TERMINALS)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  Terminal 1 - Launch Simulation:
+    cd ~/www/ros-robtics-tasks/tasks/task1
+    ./scripts/launch_task1.sh
+
+  Terminal 2 - Control Robot:
+    cd ~/www/ros-robtics-tasks/tasks/task1
+    ./scripts/teleop_control.sh
+
+═══════════════════════════════════════════════════════════════════════════════
+
+🎮 KEYBOARD CONTROLS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  Movement:
+    i     Move forward
+    ,     Move backward
+    j     Rotate left
+    l     Rotate right
+    k     Stop
+
+  Speed Adjustment:
+    q/z   Increase/decrease linear speed
+    w/x   Increase/decrease angular speed
+
+═══════════════════════════════════════════════════════════════════════════════
+
+📁 FILE STRUCTURE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  tasks/task1/
+  ├── README.md                      Complete documentation
+  ├── QUICK_START.md                 Fast reference guide
+  ├── TASK_OVERVIEW.txt              This file
+  │
+  ├── worlds/
+  │   └── custom_world.sdf           Custom 12×12m arena
+  │
+  ├── config/
+  │   └── bridge.yaml                ROS-Gazebo topic mappings
+  │
+  ├── launch/
+  │   └── task1_simulation.launch.py ROS 2 launch file
+  │
+  └── scripts/
+      ├── launch_task1.sh            Quick launch
+      ├── teleop_control.sh          Keyboard control
+      └── verify_setup.sh            Setup verification
+
+═══════════════════════════════════════════════════════════════════════════════
+
+✅ VERIFICATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  Run verification script:
+    cd ~/www/ros-robtics-tasks/tasks/task1
+    ./scripts/verify_setup.sh
+
+  Manual checks:
+    ros2 topic list              # Should show /cmd_vel, /scan, etc.
+    ros2 topic echo /scan --once # Verify LiDAR data
+    ros2 topic echo /odom --once # Verify odometry
+
+═══════════════════════════════════════════════════════════════════════════════
+
+🎯 NAVIGATION CHALLENGES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ⭐ Easy:     Navigate from start to opposite corner
+  ⭐⭐ Medium:   Complete a loop around central box
+  ⭐⭐⭐ Hard:     Figure-8 pattern around cylinders
+
+═══════════════════════════════════════════════════════════════════════════════
+
+📦 PREREQUISITES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  Install (one-time):
+    sudo apt install gz-jetty
+    sudo apt install ros-jazzy-ros-gz
+    sudo apt install ros-jazzy-teleop-twist-keyboard
+    sudo apt install ros-jazzy-turtlebot3*
+
+  Environment (~/.bashrc):
+    export TURTLEBOT3_MODEL=waffle_pi
+    export ROS_DOMAIN_ID=30
+    export GZ_SIM_RESOURCE_PATH=$HOME/.gz/models:$GZ_SIM_RESOURCE_PATH
+    source /opt/ros/jazzy/setup.bash
+
+═══════════════════════════════════════════════════════════════════════════════
+
+🎓 LEARNING OBJECTIVES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ✅ Gazebo world design with SDF
+  ✅ TurtleBot3 platform basics
+  ✅ Robot teleoperation skills
+  ✅ ROS 2 topic architecture
+  ✅ Sensor data monitoring
+  ✅ Obstacle avoidance strategies
+
+═══════════════════════════════════════════════════════════════════════════════
+
+📚 DOCUMENTATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  Quick Start:        QUICK_START.md
+  Full Guide:         README.md
+  Overview:           TASK_OVERVIEW.txt (this file)
+
+═══════════════════════════════════════════════════════════════════════════════
+
+🐛 COMMON ISSUES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  Robot doesn't spawn:
+    - Ensure ~/.gz/models exists
+    - Gazebo will auto-download models from Fuel
+
+  Robot doesn't move:
+    - Check: ros2 topic list | grep cmd_vel
+    - Test: ros2 topic pub /cmd_vel geometry_msgs/msg/Twist \
+            "{linear: {x: 0.2}}" --once
+
+  Teleop not working:
+    - Verify: ros2 pkg list | grep teleop
+    - Reinstall: sudo apt install ros-jazzy-teleop-twist-keyboard
+
+═══════════════════════════════════════════════════════════════════════════════
+
+                         🎉 READY TO START! 🎉
+
+                Read QUICK_START.md or run ./scripts/verify_setup.sh
+
+═══════════════════════════════════════════════════════════════════════════════
