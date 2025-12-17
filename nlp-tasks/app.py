@@ -515,6 +515,342 @@ def health():
     return jsonify({'status': 'ok', 'models': ['rule_based', 'embedding', 'transformer']})
 
 
+# Documentation HTML Template
+DOCS_TEMPLATE = '''
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Documentation - Textual Entailment Recognition</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            color: #fff;
+            line-height: 1.6;
+        }
+        .container { max-width: 1100px; margin: 0 auto; padding: 40px 20px; }
+        h1 {
+            text-align: center;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            background: linear-gradient(90deg, #00d4ff, #7b2cbf);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .subtitle { text-align: center; color: #888; margin-bottom: 40px; font-size: 1.1em; }
+        .nav {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+        }
+        .nav a {
+            color: #00d4ff;
+            text-decoration: none;
+            padding: 10px 20px;
+            border: 1px solid #00d4ff;
+            border-radius: 25px;
+            transition: all 0.3s;
+        }
+        .nav a:hover { background: rgba(0, 212, 255, 0.2); }
+        .card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        h2 {
+            color: #00d4ff;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(0, 212, 255, 0.3);
+        }
+        h3 { color: #7b2cbf; margin: 20px 0 10px; }
+        p { margin-bottom: 15px; color: #ccc; }
+        .badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        .badge-blue { background: #00d4ff; color: #000; }
+        .badge-green { background: #00ff88; color: #000; }
+        .badge-purple { background: #7b2cbf; color: #fff; }
+        .badge-yellow { background: #ffc107; color: #000; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        th { background: rgba(0, 212, 255, 0.1); color: #00d4ff; }
+        tr:hover { background: rgba(255, 255, 255, 0.03); }
+        .code-block {
+            background: #0d1117;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 15px 0;
+            overflow-x: auto;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 14px;
+            border: 1px solid #30363d;
+        }
+        .code-block code { color: #c9d1d9; }
+        .keyword { color: #ff7b72; }
+        .string { color: #a5d6ff; }
+        .comment { color: #8b949e; }
+        .function { color: #d2a8ff; }
+        .accuracy-bar {
+            height: 30px;
+            border-radius: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            margin: 10px 0;
+            overflow: hidden;
+        }
+        .accuracy-fill {
+            height: 100%;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        .fill-rule { background: linear-gradient(90deg, #ff6b6b, #ffc107); width: 37.5%; }
+        .fill-embed { background: linear-gradient(90deg, #ffc107, #00d4ff); width: 57.5%; }
+        .fill-trans { background: linear-gradient(90deg, #00d4ff, #00ff88); width: 92.5%; }
+        .label-box {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 8px;
+            margin: 5px;
+            font-weight: bold;
+        }
+        .label-entailment { background: rgba(0, 255, 136, 0.2); border: 2px solid #00ff88; }
+        .label-contradiction { background: rgba(255, 68, 68, 0.2); border: 2px solid #ff4444; }
+        .label-neutral { background: rgba(255, 193, 7, 0.2); border: 2px solid #ffc107; }
+        .footer {
+            text-align: center;
+            padding: 30px;
+            color: #666;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            margin-top: 40px;
+        }
+        .footer a { color: #00d4ff; text-decoration: none; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+        .feature-card {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #00d4ff;
+        }
+        .feature-card h4 { color: #00d4ff; margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧠 Textual Entailment Recognition</h1>
+        <p class="subtitle">API Documentation & Technical Reference</p>
+
+        <div class="nav">
+            <a href="/">🚀 Try Demo</a>
+            <a href="#overview">📋 Overview</a>
+            <a href="#models">🤖 Models</a>
+            <a href="#api">🔌 API</a>
+            <a href="#examples">💡 Examples</a>
+        </div>
+
+        <div class="card" id="overview">
+            <h2>📋 What is Textual Entailment?</h2>
+            <p>Textual Entailment (Natural Language Inference) determines the logical relationship between two text segments:</p>
+
+            <div style="margin: 20px 0;">
+                <div class="label-box label-entailment">✅ ENTAILMENT</div>
+                <span>Hypothesis is TRUE given the premise</span>
+            </div>
+            <div style="margin: 20px 0;">
+                <div class="label-box label-contradiction">❌ CONTRADICTION</div>
+                <span>Hypothesis CONTRADICTS the premise</span>
+            </div>
+            <div style="margin: 20px 0;">
+                <div class="label-box label-neutral">➖ NEUTRAL</div>
+                <span>Hypothesis is UNRELATED to the premise</span>
+            </div>
+
+            <h3>Features</h3>
+            <div class="grid">
+                <div class="feature-card">
+                    <h4>🚀 Three Models</h4>
+                    <p>From simple rules to state-of-the-art transformers</p>
+                </div>
+                <div class="feature-card">
+                    <h4>📊 92.5% Accuracy</h4>
+                    <p>Best-in-class with DeBERTa transformer</p>
+                </div>
+                <div class="feature-card">
+                    <h4>⚡ REST API</h4>
+                    <p>Easy integration with any application</p>
+                </div>
+                <div class="feature-card">
+                    <h4>🔒 SSL Enabled</h4>
+                    <p>Secure HTTPS connections</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="card" id="models">
+            <h2>🤖 Three Approaches</h2>
+
+            <h3>Phase 1: Rule-Based (NLTK + WordNet)</h3>
+            <div class="accuracy-bar"><div class="accuracy-fill fill-rule">37.5%</div></div>
+            <p>Uses tokenization, lemmatization, word overlap, synonym detection via WordNet, and negation detection.</p>
+            <p><span class="badge badge-green">Fast</span><span class="badge badge-yellow">Low Complexity</span></p>
+
+            <h3>Phase 2: Embedding-Based (Sentence Transformers)</h3>
+            <div class="accuracy-bar"><div class="accuracy-fill fill-embed">57.5%</div></div>
+            <p>Encodes sentences into 384-dimensional vectors using all-MiniLM-L6-v2, computes cosine similarity.</p>
+            <p><span class="badge badge-blue">Balanced</span><span class="badge badge-yellow">Medium Complexity</span></p>
+
+            <h3>Phase 3: Transformer-Based (DeBERTa-NLI)</h3>
+            <div class="accuracy-bar"><div class="accuracy-fill fill-trans">92.5%</div></div>
+            <p>Uses cross-encoder/nli-deberta-v3-small pre-trained on SNLI/MultiNLI with millions of examples.</p>
+            <p><span class="badge badge-purple">Best Accuracy</span><span class="badge badge-green">Production Ready</span></p>
+
+            <h3>Performance Comparison</h3>
+            <table>
+                <tr><th>Approach</th><th>Accuracy</th><th>Macro F1</th><th>Speed</th></tr>
+                <tr><td>Rule-Based</td><td>37.50%</td><td>0.2237</td><td>~0.003s</td></tr>
+                <tr><td>Embedding</td><td>57.50%</td><td>0.5537</td><td>~0.05s</td></tr>
+                <tr><td>Transformer</td><td><strong>92.50%</strong></td><td><strong>0.9253</strong></td><td>~0.15s</td></tr>
+            </table>
+        </div>
+
+        <div class="card" id="api">
+            <h2>🔌 API Reference</h2>
+
+            <h3>Base URL</h3>
+            <div class="code-block"><code>https://nlp.newaves-systems.com/api</code></div>
+
+            <h3>POST /api/recognize</h3>
+            <p>Analyze the entailment relationship between premise and hypothesis.</p>
+
+            <h4>Request Body</h4>
+            <div class="code-block"><code>{
+  <span class="string">"premise"</span>: <span class="string">"A man is playing a guitar on stage."</span>,
+  <span class="string">"hypothesis"</span>: <span class="string">"A person is playing a musical instrument."</span>,
+  <span class="string">"model"</span>: <span class="string">"transformer"</span>
+}</code></div>
+
+            <h4>Parameters</h4>
+            <table>
+                <tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr>
+                <tr><td>premise</td><td>string</td><td>Yes</td><td>The premise text</td></tr>
+                <tr><td>hypothesis</td><td>string</td><td>Yes</td><td>The hypothesis text</td></tr>
+                <tr><td>model</td><td>string</td><td>No</td><td>rule_based, embedding, transformer, or all</td></tr>
+            </table>
+
+            <h4>Response</h4>
+            <div class="code-block"><code>{
+  <span class="string">"results"</span>: [
+    {
+      <span class="string">"model"</span>: <span class="string">"Transformer (DeBERTa-NLI)"</span>,
+      <span class="string">"label"</span>: <span class="string">"ENTAILMENT"</span>,
+      <span class="string">"confidence"</span>: <span class="keyword">0.991</span>,
+      <span class="string">"time"</span>: <span class="keyword">0.156</span>
+    }
+  ]
+}</code></div>
+
+            <h3>GET /api/health</h3>
+            <p>Check API health status.</p>
+            <div class="code-block"><code>{
+  <span class="string">"status"</span>: <span class="string">"ok"</span>,
+  <span class="string">"models"</span>: [<span class="string">"rule_based"</span>, <span class="string">"embedding"</span>, <span class="string">"transformer"</span>]
+}</code></div>
+        </div>
+
+        <div class="card" id="examples">
+            <h2>💡 Code Examples</h2>
+
+            <h3>cURL</h3>
+            <div class="code-block"><code><span class="function">curl</span> -X POST https://nlp.newaves-systems.com/api/recognize \\
+  -H <span class="string">"Content-Type: application/json"</span> \\
+  -d <span class="string">'{
+    "premise": "The cat is sleeping on the couch.",
+    "hypothesis": "An animal is resting.",
+    "model": "transformer"
+  }'</span></code></div>
+
+            <h3>Python</h3>
+            <div class="code-block"><code><span class="keyword">import</span> requests
+
+response = requests.<span class="function">post</span>(
+    <span class="string">"https://nlp.newaves-systems.com/api/recognize"</span>,
+    json={
+        <span class="string">"premise"</span>: <span class="string">"Two dogs are playing in the park."</span>,
+        <span class="string">"hypothesis"</span>: <span class="string">"Animals are having fun outdoors."</span>,
+        <span class="string">"model"</span>: <span class="string">"transformer"</span>
+    }
+)
+
+data = response.<span class="function">json</span>()
+<span class="keyword">for</span> result <span class="keyword">in</span> data[<span class="string">"results"</span>]:
+    <span class="function">print</span>(f<span class="string">"{result['label']}: {result['confidence']:.1%}"</span>)</code></div>
+
+            <h3>JavaScript</h3>
+            <div class="code-block"><code><span class="keyword">const</span> response = <span class="keyword">await</span> <span class="function">fetch</span>(<span class="string">'https://nlp.newaves-systems.com/api/recognize'</span>, {
+  method: <span class="string">'POST'</span>,
+  headers: { <span class="string">'Content-Type'</span>: <span class="string">'application/json'</span> },
+  body: JSON.<span class="function">stringify</span>({
+    premise: <span class="string">'The movie was boring.'</span>,
+    hypothesis: <span class="string">'The movie was exciting.'</span>,
+    model: <span class="string">'transformer'</span>
+  })
+});
+
+<span class="keyword">const</span> data = <span class="keyword">await</span> response.<span class="function">json</span>();
+console.<span class="function">log</span>(data.results[0].label); <span class="comment">// CONTRADICTION</span></code></div>
+
+            <h3>Test Examples</h3>
+            <table>
+                <tr><th>Premise</th><th>Hypothesis</th><th>Expected</th></tr>
+                <tr><td>A soccer game with multiple males playing.</td><td>Some men are playing a sport.</td><td>✅ ENTAILMENT</td></tr>
+                <tr><td>The store is closed.</td><td>The store is open for business.</td><td>❌ CONTRADICTION</td></tr>
+                <tr><td>A man is walking down the street.</td><td>The man is going to work.</td><td>➖ NEUTRAL</td></tr>
+            </table>
+        </div>
+
+        <div class="footer">
+            <p>© 2024 <strong>Mostafa Ibrahim</strong></p>
+            <p>Email: <a href="mailto:mostafaibrahim1712002@gmail.com">mostafaibrahim1712002@gmail.com</a></p>
+            <p>GitHub: <a href="https://github.com/Mostafa1712002" target="_blank">@Mostafa1712002</a></p>
+            <p style="margin-top: 20px;">Built with ❤️ for NLP enthusiasts</p>
+        </div>
+    </div>
+</body>
+</html>
+'''
+
+
+@app.route('/docs')
+def docs():
+    """Serve the documentation page."""
+    return render_template_string(DOCS_TEMPLATE)
+
+
 if __name__ == '__main__':
     print("Starting Textual Entailment Recognition Server...")
     print("Visit: http://localhost:5000")
