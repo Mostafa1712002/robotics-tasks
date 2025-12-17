@@ -460,8 +460,8 @@ def recognize():
         results.append({
             'model': 'Rule-Based (NLTK)',
             'label': label,
-            'confidence': confidence,
-            'time': elapsed
+            'confidence': float(confidence),
+            'time': float(elapsed)
         })
 
     if model in ['embedding', 'all']:
@@ -473,8 +473,8 @@ def recognize():
             results.append({
                 'model': 'Embedding (Sentence-Transformers)',
                 'label': label,
-                'confidence': confidence,
-                'time': elapsed
+                'confidence': float(confidence),
+                'time': float(elapsed)
             })
         except Exception as e:
             results.append({
@@ -494,8 +494,8 @@ def recognize():
             results.append({
                 'model': 'Transformer (DeBERTa-NLI)',
                 'label': label,
-                'confidence': confidence,
-                'time': elapsed
+                'confidence': float(confidence),
+                'time': float(elapsed)
             })
         except Exception as e:
             results.append({
