@@ -12,6 +12,7 @@ License: MIT
 
 # Import required libraries for NLP processing
 import nltk  # Natural Language Toolkit for NLP operations
+from collections import Counter  # For counting label occurrences in evaluation
 from nltk.tokenize import word_tokenize  # For breaking text into words
 from nltk.corpus import stopwords, wordnet  # For stopword removal and synonym detection
 from nltk.stem import WordNetLemmatizer  # For word lemmatization (converting words to base form)
@@ -600,6 +601,184 @@ class TextualEntailmentRecognizer:
         # Step 5: Return both label and confidence, rounding confidence to 3 decimal places
         # Rounding improves readability: 0.857142857 → 0.857
         return label, round(confidence, 3)
+
+    def recognize_batch(self, pairs):
+        """
+        Batch processing for multiple premise-hypothesis pairs.
+
+        Process multiple text pairs efficiently in a single call.
+        This is more efficient than calling recognize() repeatedly because
+        it avoids repeated function call overhead.
+
+        Args:
+            pairs (list): List of dictionaries, each containing:
+                - 'premise': The premise text (str)
+                - 'hypothesis': The hypothesis text (str)
+
+        Returns:
+            list: List of predicted labels ('ENTAILMENT', 'CONTRADICTION', 'NEUTRAL')
+
+        Example:
+            pairs = [
+                {'premise': 'A dog runs.', 'hypothesis': 'An animal moves.'},
+                {'premise': 'It is sunny.', 'hypothesis': 'It is raining.'}
+            ]
+            labels = recognizer.recognize_batch(pairs)
+            # Returns: ['ENTAILMENT', 'CONTRADICTION']
+        """
+        results = []
+        for pair in pairs:
+            label = self.recognize(pair['premise'], pair['hypothesis'])
+            results.append(label)
+        return results
+
+    def recognize_batch_with_confidence(self, pairs):
+        """
+        Batch processing with confidence scores.
+
+        Process multiple text pairs and return both labels and confidence scores.
+
+        Args:
+            pairs (list): List of dictionaries with 'premise' and 'hypothesis' keys
+
+        Returns:
+            list: List of tuples (label, confidence_score)
+
+        Example:
+            results = recognizer.recognize_batch_with_confidence(pairs)
+            for label, conf in results:
+                print(f"{label}: {conf}")
+        """
+        results = []
+        for pair in pairs:
+            label, confidence = self.recognize_with_confidence(
+                pair['premise'], pair['hypothesis']
+            )
+            results.append((label, confidence))
+        return results
+
+    def evaluate(self, pairs, gold_labels):
+        """
+        Evaluate the recognizer against gold standard labels.
+
+        Calculates comprehensive evaluation metrics including accuracy,
+        precision, recall, and F1-score for each class.
+
+        Args:
+            pairs (list): List of dictionaries with 'premise' and 'hypothesis' keys
+            gold_labels (list): List of true labels (same length as pairs)
+
+        Returns:
+            dict: Evaluation metrics including:
+                - 'accuracy': Overall accuracy (correct / total)
+                - 'per_class': Dict with precision, recall, F1 for each class
+                - 'macro_f1': Average F1 across all classes
+                - 'predictions': List of predicted labels
+                - 'confusion_matrix': Dict showing prediction distribution
+
+        Example:
+            metrics = recognizer.evaluate(test_pairs, test_labels)
+            print(f"Accuracy: {metrics['accuracy']:.2%}")
+            print(f"Macro F1: {metrics['macro_f1']:.3f}")
+        """
+        # Get predictions for all pairs
+        predictions = self.recognize_batch(pairs)
+
+        # Calculate overall accuracy
+        correct = sum(1 for pred, gold in zip(predictions, gold_labels) if pred == gold)
+        accuracy = correct / len(gold_labels) if gold_labels else 0.0
+
+        # Define all possible labels
+        labels = ['ENTAILMENT', 'CONTRADICTION', 'NEUTRAL']
+
+        # Calculate per-class metrics
+        per_class = {}
+        for label in labels:
+            # True Positives: predicted as label AND actually is label
+            tp = sum(1 for pred, gold in zip(predictions, gold_labels)
+                     if pred == label and gold == label)
+
+            # False Positives: predicted as label BUT actually is NOT label
+            fp = sum(1 for pred, gold in zip(predictions, gold_labels)
+                     if pred == label and gold != label)
+
+            # False Negatives: NOT predicted as label BUT actually IS label
+            fn = sum(1 for pred, gold in zip(predictions, gold_labels)
+                     if pred != label and gold == label)
+
+            # Precision: Of all predicted as label, how many are correct?
+            precision = tp / (tp + fp) if (tp + fp) > 0 else 0.0
+
+            # Recall: Of all actual label, how many did we find?
+            recall = tp / (tp + fn) if (tp + fn) > 0 else 0.0
+
+            # F1-score: Harmonic mean of precision and recall
+            f1 = 2 * (precision * recall) / (precision + recall) if (precision + recall) > 0 else 0.0
+
+            per_class[label] = {
+                'precision': round(precision, 4),
+                'recall': round(recall, 4),
+                'f1': round(f1, 4),
+                'support': sum(1 for g in gold_labels if g == label)
+            }
+
+        # Calculate macro F1 (average F1 across classes)
+        macro_f1 = sum(per_class[label]['f1'] for label in labels) / len(labels)
+
+        # Build confusion matrix
+        confusion_matrix = {gold: Counter() for gold in labels}
+        for pred, gold in zip(predictions, gold_labels):
+            confusion_matrix[gold][pred] += 1
+
+        return {
+            'accuracy': round(accuracy, 4),
+            'per_class': per_class,
+            'macro_f1': round(macro_f1, 4),
+            'predictions': predictions,
+            'confusion_matrix': dict(confusion_matrix),
+            'total_samples': len(gold_labels)
+        }
+
+    def print_evaluation_report(self, metrics):
+        """
+        Print a formatted evaluation report.
+
+        Args:
+            metrics (dict): Output from evaluate() method
+        """
+        print("\n" + "=" * 70)
+        print("EVALUATION REPORT")
+        print("=" * 70)
+
+        print(f"\nTotal Samples: {metrics['total_samples']}")
+        print(f"Overall Accuracy: {metrics['accuracy']:.2%}")
+        print(f"Macro F1-Score: {metrics['macro_f1']:.4f}")
+
+        print("\n" + "-" * 70)
+        print("Per-Class Metrics:")
+        print("-" * 70)
+        print(f"{'Class':<15} {'Precision':<12} {'Recall':<12} {'F1-Score':<12} {'Support':<10}")
+        print("-" * 70)
+
+        for label in ['ENTAILMENT', 'CONTRADICTION', 'NEUTRAL']:
+            m = metrics['per_class'][label]
+            print(f"{label:<15} {m['precision']:<12.4f} {m['recall']:<12.4f} {m['f1']:<12.4f} {m['support']:<10}")
+
+        print("\n" + "-" * 70)
+        print("Confusion Matrix (rows=actual, cols=predicted):")
+        print("-" * 70)
+        labels = ['ENTAILMENT', 'CONTRADICTION', 'NEUTRAL']
+        header = f"{'Actual/Pred':<15}" + "".join(f"{l[:6]:<12}" for l in labels)
+        print(header)
+
+        for actual in labels:
+            row = f"{actual[:12]:<15}"
+            for pred in labels:
+                count = metrics['confusion_matrix'].get(actual, {}).get(pred, 0)
+                row += f"{count:<12}"
+            print(row)
+
+        print("=" * 70 + "\n")
 
 
 def main():
