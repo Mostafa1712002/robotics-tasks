@@ -18,7 +18,8 @@ import numpy as np
 from collections import Counter
 
 try:
-    from transformers import pipeline, AutoModelForSequenceClassification, AutoTokenizer
+    from transformers import AutoModelForSequenceClassification, AutoTokenizer
+    import torch
     TRANSFORMERS_AVAILABLE = True
 except ImportError:
     TRANSFORMERS_AVAILABLE = False
@@ -61,16 +62,14 @@ class TransformerEntailmentRecognizer:
         self.model_name = model_name
         print(f"Loading transformer model: {model_name}...")
 
-        # Use the zero-shot classification pipeline for NLI
-        # This handles the model loading and inference efficiently
-        self.classifier = pipeline(
-            "zero-shot-classification",
-            model=model_name,
-            device=-1  # CPU, use 0 for GPU
-        )
+        # Load tokenizer and model for sequence classification
+        self.tokenizer = AutoTokenizer.from_pretrained(model_name)
+        self.model = AutoModelForSequenceClassification.from_pretrained(model_name)
+        self.model.eval()  # Set to evaluation mode
 
-        # Label mapping
-        self.labels = ['entailment', 'contradiction', 'neutral']
+        # Label mapping for cross-encoder NLI models
+        # These models output: [contradiction, entailment, neutral]
+        self.id2label = {0: 'CONTRADICTION', 1: 'ENTAILMENT', 2: 'NEUTRAL'}
 
         print("Transformer model loaded successfully!")
 
@@ -88,18 +87,23 @@ class TransformerEntailmentRecognizer:
         Returns:
             str: 'ENTAILMENT', 'CONTRADICTION', or 'NEUTRAL'
         """
-        # Format input for the model
-        # The model expects: premise [SEP] hypothesis
-        result = self.classifier(
-            premise,
-            candidate_labels=self.labels,
-            hypothesis_template=hypothesis + " {}"
+        # Tokenize the premise-hypothesis pair
+        inputs = self.tokenizer(
+            premise, hypothesis,
+            return_tensors='pt',
+            truncation=True,
+            max_length=512
         )
 
-        # Get the top prediction
-        top_label = result['labels'][0]
+        # Run inference
+        with torch.no_grad():
+            outputs = self.model(**inputs)
+            logits = outputs.logits
 
-        return top_label.upper()
+        # Get prediction
+        predicted_class = logits.argmax(dim=1).item()
+
+        return self.id2label[predicted_class]
 
     def recognize_with_confidence(self, premise, hypothesis):
         """
@@ -112,16 +116,25 @@ class TransformerEntailmentRecognizer:
         Returns:
             tuple: (label, confidence_score)
         """
-        result = self.classifier(
-            premise,
-            candidate_labels=self.labels,
-            hypothesis_template=hypothesis + " {}"
+        # Tokenize the premise-hypothesis pair
+        inputs = self.tokenizer(
+            premise, hypothesis,
+            return_tensors='pt',
+            truncation=True,
+            max_length=512
         )
 
-        top_label = result['labels'][0].upper()
-        top_score = result['scores'][0]
+        # Run inference
+        with torch.no_grad():
+            outputs = self.model(**inputs)
+            logits = outputs.logits
+            probs = torch.softmax(logits, dim=1)
 
-        return top_label, round(top_score, 3)
+        # Get prediction and confidence
+        predicted_class = logits.argmax(dim=1).item()
+        confidence = probs[0][predicted_class].item()
+
+        return self.id2label[predicted_class], round(confidence, 3)
 
     def recognize_batch(self, pairs):
         """
