@@ -1,0 +1,36 @@
+services:
+  ros2-gazebo:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: robotics-tasks:jazzy
+    container_name: ros2-turtlebot3-sim
+
+    # Enable GUI apps (Gazebo)
+    environment:
+      - DISPLAY=${DISPLAY}
+      - QT_X11_NO_MITSHM=1
+      - TURTLEBOT3_MODEL=waffle_pi
+      - ROS_DOMAIN_ID=30
+
+    # Share X11 socket for GUI (for Windows with VcXsrv or WSL2)
+    volumes:
+      - ./:/root/robotics-tasks
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+      - ~/.gz:/root/.gz
+
+    # Network mode for ROS 2 communication
+    network_mode: host
+
+    # Keep container running
+    stdin_open: true
+    tty: true
+
+    # Privileged mode for hardware access (if needed)
+    privileged: true
+
+    # Working directory
+    working_dir: /root/robotics-tasks/task1
+
+    # Default command
+    command: /bin/bash

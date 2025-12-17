@@ -1,0 +1,51 @@
+================================================================================
+  HOW TO CONTROL THE ROBOT - Quick Guide
+================================================================================
+
+PROBLEM: Blue Screen / Can't See Gazebo?
+-----------------------------------------
+Double-click: FIX_DISPLAY.bat
+This will restart everything properly.
+
+
+CONTROL THE ROBOT MANUALLY
+-----------------------------------------
+Double-click: KEYBOARD_CONTROL.bat
+
+Then press these keys:
+  I = Forward
+  K = Backward
+  J = Turn Left
+  L = Turn Right
+  S = Stop
+  Q = Quit
+
+
+VIEW WHAT'S HAPPENING
+-----------------------------------------
+Double-click: VIEW_LOGS.bat
+
+Choose option 4 to see live navigation updates
+Choose option 1 to see startup log
+
+
+STOP EVERYTHING
+-----------------------------------------
+Double-click: STOP_ROBOT.bat
+
+
+START EVERYTHING
+-----------------------------------------
+Double-click: START_ROBOT.bat
+
+
+SUMMARY OF ALL FILES
+================================================================================
+START_ROBOT.bat          - Start the simulation (run this first!)
+STOP_ROBOT.bat           - Stop everything
+FIX_DISPLAY.bat          - Fix blue screen issue
+KEYBOARD_CONTROL.bat     - Control robot with I/J/K/L keys
+VIEW_LOGS.bat            - View all logs (startup, navigation, etc)
+MANUAL_CONTROL.bat       - Alternative control with W/A/S/D keys
+
+================================================================================
