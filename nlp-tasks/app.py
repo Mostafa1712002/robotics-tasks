@@ -658,6 +658,49 @@ DOCS_TEMPLATE = '''
             border-left: 4px solid #00d4ff;
         }
         .feature-card h4 { color: #00d4ff; margin-bottom: 10px; }
+
+        /* Mobile Responsive Styles */
+        @media (max-width: 768px) {
+            .container { padding: 20px 15px; }
+            h1 { font-size: 1.8em; }
+            .subtitle { font-size: 0.95em; margin-bottom: 25px; }
+            .nav { gap: 10px; margin-bottom: 25px; }
+            .nav a { padding: 8px 14px; font-size: 13px; }
+            .card { padding: 20px 15px; margin-bottom: 20px; border-radius: 12px; }
+            h2 { font-size: 1.3em; margin-bottom: 15px; }
+            h3 { font-size: 1.1em; margin: 15px 0 8px; }
+            h4 { font-size: 1em; }
+            p { font-size: 14px; }
+            .grid { grid-template-columns: 1fr; gap: 15px; }
+            .feature-card { padding: 15px; }
+            .label-box { padding: 6px 12px; font-size: 13px; display: block; margin: 10px 0; }
+            .badge { padding: 4px 10px; font-size: 11px; margin: 3px 5px 3px 0; }
+            .accuracy-bar { height: 25px; }
+            .accuracy-fill { font-size: 12px; }
+
+            /* Table responsive */
+            table { font-size: 12px; display: block; overflow-x: auto; white-space: nowrap; }
+            th, td { padding: 8px 10px; }
+
+            /* Code block responsive */
+            .code-block { padding: 12px; font-size: 11px; border-radius: 8px; }
+
+            .footer { padding: 20px 15px; }
+            .footer p { font-size: 13px; }
+        }
+
+        @media (max-width: 480px) {
+            .container { padding: 15px 10px; }
+            h1 { font-size: 1.5em; }
+            .subtitle { font-size: 0.85em; }
+            .nav { flex-direction: column; align-items: center; }
+            .nav a { width: 100%; text-align: center; }
+            .card { padding: 15px 12px; }
+            h2 { font-size: 1.2em; }
+            .code-block { font-size: 10px; padding: 10px; }
+            table { font-size: 11px; }
+            th, td { padding: 6px 8px; }
+        }
     </style>
 </head>
 <body>
