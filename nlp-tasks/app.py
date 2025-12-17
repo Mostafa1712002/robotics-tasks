@@ -238,6 +238,40 @@ HTML_TEMPLATE = '''
             color: #00d4ff;
             margin-bottom: 10px;
         }
+
+        /* Mobile Responsive Styles */
+        @media (max-width: 768px) {
+            body { padding: 15px; }
+            h1 { font-size: 1.6em; }
+            .subtitle { font-size: 14px; margin-bottom: 20px; }
+            .card { padding: 18px; border-radius: 12px; }
+            .input-group { margin-bottom: 15px; }
+            label { font-size: 14px; margin-bottom: 6px; }
+            textarea { padding: 12px; font-size: 14px; min-height: 70px; }
+            .model-select { gap: 8px; }
+            .model-option { min-width: 100%; padding: 12px; }
+            .model-name { font-size: 14px; }
+            .model-desc { font-size: 11px; }
+            .btn { padding: 12px 20px; font-size: 16px; }
+            .result-item { padding: 15px; }
+            .result-label { font-size: 20px; }
+            .result-confidence { font-size: 14px; }
+            .example-btn { padding: 8px 14px; font-size: 12px; margin: 4px; }
+            .info-box { padding: 12px; font-size: 13px; }
+            .info-box h3 { font-size: 14px; }
+        }
+
+        @media (max-width: 480px) {
+            body { padding: 10px; }
+            h1 { font-size: 1.4em; }
+            .subtitle { font-size: 13px; }
+            .card { padding: 15px; }
+            textarea { font-size: 13px; min-height: 60px; }
+            .model-option { padding: 10px; }
+            .btn { font-size: 15px; padding: 10px 15px; }
+            .result-label { font-size: 18px; }
+            .example-btn { width: 100%; margin: 5px 0; }
+        }
     </style>
 </head>
 <body>
